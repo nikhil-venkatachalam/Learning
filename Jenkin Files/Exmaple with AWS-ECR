@@ -1,0 +1,139 @@
+pipeline{
+    agent {label 'aws'}
+    tools {
+        jdk 'JDK17'
+        maven 'MAVEN3'
+        git 'GIT'
+        dockerTool 'DOCKER'
+    }
+    environment{
+                AWS_REGION = 'us-east-1'
+            }
+    options{
+        buildDiscarder(logRotator(numToKeepStr: '3', artifactNumToKeepStr: '3'))
+        timeout(time: 30, unit: 'MINUTES')
+    }
+    stages{
+        stage('Build artifact'){
+            steps{
+                sh 'mvn clean install'
+            }
+            post{
+                success{
+
+                    archiveArtifacts artifacts: 'target/*.war', fingerprint: true
+                    echo "Artifact archived successfully"
+                }
+                failure{
+                    echo "Build failed. Artifact not archived."
+                }
+            }
+        }
+        stage('Sonar Scan') {
+            steps {
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                    sh '''
+                    mvn verify sonar:sonar \
+                    -Dsonar.projectKey=Vineeth-Parvatam_vprofile-project \
+                    -Dsonar.organization=vineeth-parvatam \
+                    -Dsonar.host.url=https://sonarcloud.io \
+                    -Dsonar.login=$SONAR_TOKEN
+                    '''
+                }
+            }
+            post {
+                success {
+                    echo "SonarQube analysis completed successfully."
+                }
+                failure{
+                    echo "SonarQube analysis failed."
+                }
+            }
+        }
+        stage ('Prepare ECR Login') {
+            steps {
+                withCredentials([aws(credentialsId: 'aws-creds')]) {
+                    script {
+                        env.ACCOUNT_ID = sh(script: "aws sts get-caller-identity --query Account --output text", returnStdout: true).trim()
+                        env.ECR_REGISTRY= "${env.ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com"
+                    }
+                }
+            }
+
+        }
+        stage('Build Docker Images'){
+            steps{
+                withCredentials([aws(credentialsId: 'aws-creds')]){
+                    sh '''
+                    aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+                    docker build -t $ECR_REGISTRY/vprofile-app:latest -f Dockerfiles/app/Dockerfile .
+                    docker build -t $ECR_REGISTRY/vprofile-db:latest -f Dockerfiles/db/Dockerfile .
+                    docker build -t $ECR_REGISTRY/vprofile-web:latest -f Dockerfiles/web/Dockerfile .
+                    '''
+                }
+            }
+        }
+        stage('Trivy Scan'){
+            steps{
+                sh '''
+                trivy image --severity CRITICAL --format json -o trivy-app-report.json $ECR_REGISTRY/vprofile-app:latest
+                trivy image --severity CRITICAL --format json -o trivy-db-report.json $ECR_REGISTRY/vprofile-db:latest
+                trivy image --severity CRITICAL --format json -o trivy-web-report.json $ECR_REGISTRY/vprofile-web:latest
+                APP_CRITICAL_COUNT=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity=="CRITICAL")] | length' trivy-app-report.json)
+                DB_CRITICAL_COUNT=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity=="CRITICAL")] | length' trivy-db-report.json)
+                WEB_CRITICAL_COUNT=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity=="CRITICAL")] | length' trivy-web-report.json)
+                if [ "$APP_CRITICAL_COUNT" -gt 5 ] || [ "$DB_CRITICAL_COUNT" -gt 5 ] || [ "$WEB_CRITICAL_COUNT" -gt 5 ]; then
+                    echo "Critical vulnerabilities found. Failing the build."
+                    exit 1
+                else
+                    echo "No critical vulnerabilities found. App Critical: $APP_CRITICAL_COUNT, DB Critical: $DB_CRITICAL_COUNT, Web Critical: $WEB_CRITICAL_COUNT"
+                fi
+                '''
+            }
+            post{
+                success{
+                    echo "Trivy scan completed successfully. No high or critical vulnerabilities found."
+                }
+                failure{
+                    echo "Trivy scan failed. High or critical vulnerabilities detected."
+                }
+            }
+
+        }
+        stage('ECR Login and Push'){
+            steps{
+                withCredentials([aws(credentialsId: 'aws-creds')]){
+                    sh '''
+                    aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+                    docker tag $ECR_REGISTRY/vprofile-app:latest $ECR_REGISTRY/vprofile-app:${BUILD_NUMBER}
+                    docker tag $ECR_REGISTRY/vprofile-db:latest $ECR_REGISTRY/vprofile-db:${BUILD_NUMBER}
+                    docker tag $ECR_REGISTRY/vprofile-web:latest $ECR_REGISTRY/vprofile-web:${BUILD_NUMBER}
+
+                    docker push $ECR_REGISTRY/vprofile-app:${BUILD_NUMBER}
+                    docker push $ECR_REGISTRY/vprofile-db:${BUILD_NUMBER}
+                    docker push $ECR_REGISTRY/vprofile-web:${BUILD_NUMBER}
+
+                    docker push $ECR_REGISTRY/vprofile-app:latest
+                    docker push $ECR_REGISTRY/vprofile-db:latest
+                    docker push $ECR_REGISTRY/vprofile-web:latest
+                    '''
+                }
+            }
+            post{
+                success{
+                    echo "Docker images pushed to ECR and cleaned up successfully."
+                }
+                failure{
+                    echo "Failed to push Docker images to ECR."
+                }
+            }
+        }
+    }
+    post{
+        always{
+            echo "Pipeline execution completed, cleaning up docker images."
+            archiveArtifacts artifacts: 'trivy-*-report.json', fingerprint: true
+            sh 'docker system prune -a -f'
+        }
+    }
+}
