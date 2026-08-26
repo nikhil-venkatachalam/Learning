@@ -1,0 +1,32 @@
+| Command                            | Purpose                                                                      |
+| ---------------------------------- | ---------------------------------------------------------------------------- |
+| `docker ps`                        | Show currently running containers                                            |
+| `docker ps -a`                     | Show all containers, including stopped/failed ones                           |
+| `docker logs <container>`          | Check application/container logs                                             |
+| `docker logs -f <container>`       | Follow logs live                                                             |
+| `docker inspect <container>`       | Show detailed container configuration, networking, mounts, environment, etc. |
+| `docker exec -it <container> sh`   | Enter a running container that has `sh`                                      |
+| `docker exec -it <container> bash` | Enter a running container that has Bash                                      |
+| `docker exec <container> env`      | Check environment variables inside the container                             |
+| `docker exec <container> ps aux`   | Check processes running inside the container                                 |
+| `docker stats`                     | Check live CPU, memory, network, and I/O usage                               |
+| `docker top <container>`           | Show processes running inside a specific container                           |
+| `docker port <container>`          | Check container port mappings                                                |
+| `docker network ls`                | List Docker networks                                                         |
+| `docker network inspect <network>` | Check which containers are connected to a network                            |
+| `docker volume ls`                 | List Docker volumes                                                          |
+| `docker volume inspect <volume>`   | Inspect volume location/configuration                                        |
+| `docker images`                    | List local Docker images                                                     |
+| `docker inspect <image>`           | Inspect image configuration                                                  |
+| `docker history <image>`           | See the layers used to build an image                                        |
+| `docker restart <container>`       | Restart a container                                                          |
+| `docker stop <container>`          | Stop a running container                                                     |
+| `docker start <container>`         | Start a stopped container                                                    |
+| `docker rm <container>`            | Remove a stopped container                                                   |
+| `docker rmi <image>`               | Remove an image                                                              |
+| `docker system df`                 | Check Docker disk usage                                                      |
+| `docker system prune`              | Remove unused Docker resources; use carefully                                |
+| `docker compose ps`                | Check containers belonging to a Compose application                          |
+| `docker compose logs`              | Check logs for all Compose services                                          |
+| `docker compose logs -f backend`   | Follow logs for one Compose service                                          |
+| `docker compose config`            | Validate and display the resolved Compose configuration                      
