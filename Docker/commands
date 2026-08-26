@@ -1,1 +1,45 @@
+Create:
 
+touch Dockerfile
+nano Dockerfile
+sudo systemctl status docker
+
+BUILD AND RUN:
+
+docker build -t nikhilbecomessre/my-first-docker-image:latest .
+docker build -t $username/$imagename:$version .
+docker images
+docker run -d --name $container -p 8080:80 $username/$imagename:$version
+
+DEBUG:
+
+docker ps
+docker ps -a
+docker logs $container
+docker exec -it $container sh
+docker inspect $container
+docker stats
+
+START AND STOP:
+
+docker stop $container
+docker start $container
+docker restart $container
+docker rm $container
+
+CONTAINER PUSH TO HUB:
+
+docker login
+docker push $username/$imagename:$version
+docker pull $username/$imagename:$version
+
+COMPOSE:
+
+docker compose up -d
+docker compose ps
+docker compose logs
+docker compose down
+
+
+docker network ls
+docker volume ls
