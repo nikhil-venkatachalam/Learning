@@ -1,0 +1,43 @@
+pipeline {
+
+    agent none   # no agent given because we dont have permanent agent like docker image or VM/EC2.
+
+    stages {
+
+        stage('Build on Kubernetes Agent') {
+
+            agent {
+                kubernetes {
+                    yamlFile 'k8s/jenkins-agent-pod.yaml'
+                }
+            }
+
+            stages {
+
+                #THIS IS NOT IMPORTANT AS WE JUST HAVE THIS TO CHECK THE POD.(verify and understand that your pipeline is really running inside the Kubernetes Pod.)
+                stage('Check Agent') {
+                    steps {
+                        container('node') {
+                            sh '''
+                                echo "Running inside Kubernetes Jenkins agent"
+                                hostname
+                                node --version
+                                npm --version
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully'
+        }
+
+        failure {
+            echo 'Pipeline failed'
+        }
+    }
+}
