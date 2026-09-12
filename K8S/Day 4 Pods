@@ -1,1 +1,18 @@
 ALL YOU Should KOW ABOUT POD
+
+Smallest Deplyable Unit -POD
+-------------------------------------------------------------------------------------
+Example POD.yml
+apiVersion: v1              # Which API?
+kind: Pod                   # What am I creating?
+
+metadata:
+  name: nginx               # What is its name?
+
+spec:                       # How should the Pod be built?
+  containers:               # Containers inside the Pod
+  - name: nginx             # Container name
+    image: nginx:1.14.2     # Docker image
+    ports:
+    - containerPort: 80     # Application listens on port 80
+------------------------------------------------------------------------------------------
