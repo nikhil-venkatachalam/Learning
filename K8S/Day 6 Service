@@ -1,1 +1,40 @@
+Service:
 
+we have 3 service component.
+1.Cluster Ip
+2.Node PORT
+3.Load Balancer
+
+Cluster Ip:
+If the application should be used inside the machine ( For eg. the application is running in EC2 we have to login in EC2 and we can access the application)
+
+Node PORT:
+if we can use in same network ( see person 1 and 2 are in same office they dont have the acces to EC2 but they have access to network so they can use)
+
+Load Balancer:
+Application exposed to outer world.
+
+
+example yaml. for service:
+
+  type: NodePort  ----we can chenge here.
+-------------------------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: MyApp
+  ports:
+    - port: 80
+      # By default and for convenience, the `targetPort` is set to
+      # the same value as the `port` field.
+      targetPort: 80
+      # Optional field
+      # By default and for convenience, the Kubernetes control plane
+      # will allocate a port from a range (default: 30000-32767)
+      nodePort: 30007
+
+--------------------------------------------------------------------------------------------
