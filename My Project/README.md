@@ -5,4 +5,8 @@ Tools:
 3.Jenkins.
 4.Argo CD.
 5.Helm
-6.Grafana/Promrethous/Dynatrace
+6.Grafana/Prometheus/Dynatrace
+
+
+
+Architecture Diagram:
