@@ -1,3 +1,36 @@
+Deployment:
+Deployment in Kubernetes is the main reason to auto healing and auto scaling.
+
+For example refer the below Deployment.yml.
+
+by using the replica er can increase the pod.
+Replica is nothing but the number of pod should be running as application, even one pod fails the traffic will fall through the other pod.
+In meantime replica contoller will automatically create the other pod so that it will match the relica count mentioned in deployment.yml.
+------------------------------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3 ----------------------------------------------here you can see the replica.
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 80
+---------------------------------------------------------------------------------------
+
+
 Deployment
     ↓
 How many Pods?
