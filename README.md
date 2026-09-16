@@ -1,10 +1,10 @@
 # Learning
 
-Java    pom.xml	                                Maven
+Java            pom.xml	                                Maven
 
-Python	requirements.txt / pyproject.toml	      pip / Poetry / uv
+Python	        requirements.txt / pyproject.toml	      pip / Poetry / uv
 
-Node.js	package.json	                          npm
+Node.js	        package.json	                          npm
 
 
 To install maven:
