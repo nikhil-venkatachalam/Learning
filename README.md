@@ -1,6 +1,9 @@
 # Learning
+
 Java    pom.xml	                                Maven
+
 Python	requirements.txt / pyproject.toml	      pip / Poetry / uv
+
 Node.js	package.json	                          npm
 
 
