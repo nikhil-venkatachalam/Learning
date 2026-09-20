@@ -1,0 +1,214 @@
+In joining neew company they gave new repo i want to add in new repo.
+
+Yes. Think of this as your first day on a real project. Your lead says:
+
+“Nikhil, here is the Git repo. Set it up on your local machine.”
+
+You should know the flow from zero → repo available locally → ready to work.
+
+Assume they give you:
+https://github.com/company/payment-service.git
+
+1. Check whether Git is installed
+git --version 
+
+If you get something like:
+git version 2.5x.x
+
+On Mac, if Git isn't installed, you can install the Apple command-line tools:
+xcode-select --install
+Or, if your company uses Homebrew:
+brew install git
+Then verify again:
+git --version
+
+2. Configure your Git identity
+
+If they want your company identity globally:
+git config --global user.name "Nikhil V"
+git config --global user.email "nikhil@company.com"
+
+Verify:
+git config --global --list
+
+3. Get access to the company's Git server
+
+This is important. Installing Git doesn't automatically give you access.
+Your company might use GitHub, GitLab, Bitbucket, Azure DevOps, etc. Usually they'll give you either an HTTPS or SSH clone URL.
+
+For SSH, first check:
+ls -la ~/.ssh
+
+Check for an existing key:
+ls ~/.ssh/id_ed25519.pub
+If your company wants you to create one:
+ssh-keygen -t ed25519 -C "nikhil@company.com"
+Then:
+cat ~/.ssh/id_ed25519.pub
+You add that public key to the company's Git platform. Never share:
+~/.ssh/id_ed25519
+
+Create your local workspace
+
+For example:
+
+mkdir -p ~/projects
+cd ~/projects
+
+Now you're ready to bring the company repository down.
+
+5. Clone the repository
+
+Your lead might give you:
+
+git@github.com:company/payment-service.git
+
+Then:
+
+git clone git@github.com:company/payment-service.git
+
+Git creates:
+
+projects/
+└── payment-service/
+
+Enter it:
+
+cd payment-service
+6. Immediately inspect the repo
+
+First:
+
+git status
+
+You might see:
+
+On branch main
+Your branch is up to date with 'origin/main'.
+
+nothing to commit, working tree clean
+
+Then:
+
+git remote -v
+
+You should see something like:
+
+origin  git@github.com:company/payment-service.git (fetch)
+origin  git@github.com:company/payment-service.git (push)
+
+This tells you:
+
+LOCAL REPO
+    ↕
+origin
+    ↕
+COMPANY REMOTE REPO
+
+Check branches:
+
+git branch
+
+Remote branches:
+
+git branch -r
+
+All branches:
+
+git branch -a
+7. Before starting work, sync
+
+Suppose your team's main development branch is develop:
+
+git switch develop
+git pull
+
+Then don't normally start making changes directly on develop.
+
+Create your working branch:
+
+git switch -c feature/payment-monitoring
+
+Now:
+
+git branch
+
+might show:
+
+develop
+* feature/payment-monitoring
+
+The * tells you which branch you're currently on.
+
+8. Now you work
+
+For example, your task might be changing:
+
+Jenkinsfile
+Dockerfile
+helm/values.yaml
+k8s/deployment.yaml
+
+After making changes:
+
+git status
+
+See the difference:
+
+git diff
+
+Stage:
+
+git add Jenkinsfile
+
+Or all intended changes:
+
+git add .
+
+Commit:
+
+git commit -m "Add SonarQube scan to CI pipeline"
+
+Push your new branch:
+
+git push -u origin feature/payment-monitoring
+
+Then normally you create a Pull Request / Merge Request, someone reviews it, and it gets merged according to your team's process.
+
+So keep this real-project flow in your head:
+
+Install/check Git
+        ↓
+Configure identity
+        ↓
+Get repository access
+        ↓
+Clone company repo
+        ↓
+cd repo
+        ↓
+git status
+git remote -v
+git branch -a
+        ↓
+Switch to team's base branch
+        ↓
+git pull
+        ↓
+Create feature branch
+        ↓
+Make changes
+        ↓
+git status / git diff
+        ↓
+git add
+        ↓
+git commit
+        ↓
+git push
+        ↓
+Pull Request / Merge Request
+        ↓
+Review
+        ↓
+Merge
