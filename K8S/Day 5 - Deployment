@@ -29,7 +29,26 @@ spec:
         ports:
         - containerPort: 80
 ---------------------------------------------------------------------------------------
-
+Deployment
+│
+├── Deployment information
+│   ├── name
+│   ├── namespace
+│   └── labels
+│
+└── Deployment spec
+    ├── replicas: 3
+    ├── selector
+    │
+    └── template  ← POD BLUEPRINT STARTS HERE
+        │
+        ├── metadata
+        │   └── labels
+        │
+        └── spec
+            └── containers
+                └── backend container
+------------------------------------------------------------------------------------
 
 Deployment
     ↓
